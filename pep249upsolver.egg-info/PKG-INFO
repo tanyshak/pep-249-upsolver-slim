@@ -1,0 +1,23 @@
+Metadata-Version: 2.1
+Name: pep249upsolver
+Version: 0.0.1b3
+Summary: Slim implementation of the DB 2.0 API outlined in PEP-249. for upsolver
+Home-page: https://github.com/tanyshak/pep-249-upsolver-slim
+Author: Tetiana Shemet
+Author-email: tanyshak@gmail.com
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Development Status :: 4 - Beta
+Classifier: Natural Language :: English
+Classifier: Intended Audience :: Developers
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Software Development :: Libraries
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Typing :: Typed
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
+# An Slim PEP-249 Implementation for Upsolver
+
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
