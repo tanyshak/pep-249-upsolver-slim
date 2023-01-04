@@ -23,6 +23,8 @@ from .types import (
     ProcArgs,
 )
 
+import logging
+
 
 CursorType = TypeVar("CursorType", "Cursor", "TransactionalCursor")
 
@@ -46,7 +48,8 @@ class CursorExecuteMixin(metaclass=ABCMeta):
         as outlined in PEP 249.
 
         """
-        print('execute')
+        logging.debug(f"pep249 execute {self.__class__.__name__}")
+        print(f"pep249 execute {self.__class__.__name__}")
 
     def executemany(
         self: CursorType,
@@ -58,7 +61,8 @@ class CursorExecuteMixin(metaclass=ABCMeta):
         or mappings passed as parameters.
 
         """
-        print('executemany')
+        logging.debug(f"pep249 executemany {self.__class__.__name__}")
+        print(f"pep249 executemany {self.__class__.__name__}")
 
     def callproc(
         self: CursorType, procname: ProcName, parameters: Optional[ProcArgs] = None
@@ -72,7 +76,8 @@ class CursorExecuteMixin(metaclass=ABCMeta):
         can be made available through the standard fetch methods.
 
         """
-        print('callproc')
+        logging.debug(f"pep249 callproc {self.__class__.__name__}")
+        print(f"pep249 callproc {self.__class__.__name__}")
 
 
 class CursorSetSizeMixin(metaclass=ABCMeta):
@@ -92,7 +97,8 @@ class CursorSetSizeMixin(metaclass=ABCMeta):
 
         Implementations are free to have this method do nothing.
         """
-        print('setinputsizes')
+        logging.debug(f"pep249 setinputsizes {self.__class__.__name__}")
+        print(f"pep249 setinputsizes {self.__class__.__name__}")
 
     def setoutputsize(self: CursorType, size: int, column: Optional[int]) -> None:
         """
@@ -107,7 +113,8 @@ class CursorSetSizeMixin(metaclass=ABCMeta):
 
         Implementations are free to have this method do nothing.
         """
-        print('setoutputsize')
+        logging.debug(f"pep249 setoutputsize {self.__class__.__name__}")
+        print(f"pep249 setoutputsize {self.__class__.__name__}")
 
 
 class CursorFetchMixin(metaclass=ABCMeta):
@@ -125,7 +132,8 @@ class CursorFetchMixin(metaclass=ABCMeta):
 
         If there is no result set, return None.
         """
-        print('description')
+        logging.debug(f"pep249 description {self.__class__.__name__}")
+        print(f"pep249 description {self.__class__.__name__}")
 
     @property
     def rowcount(self: CursorType) -> int:
@@ -137,7 +145,8 @@ class CursorFetchMixin(metaclass=ABCMeta):
         If no execute has been performed or the rowcount cannot be determined,
         this should return -1.
         """
-        print('rowcount')
+        logging.debug(f"pep249 rowcount {self.__class__.__name__}")
+        print(f"pep249 rowcount {self.__class__.__name__}")
 
     @property
     def arraysize(self: CursorType) -> int:
@@ -147,13 +156,18 @@ class CursorFetchMixin(metaclass=ABCMeta):
 
         Defaults to 1, meaning fetch a single row at a time.
         """
+        logging.debug(f"pep249 arraysize {self.__class__.__name__}")
+        print(f"pep249 arraysize {self.__class__.__name__}")
+
         return getattr(self, "_arraysize", 1)
 
     @arraysize.setter
     def arraysize(self: CursorType, value: int):
         setattr(self, "_arraysize", value)
 
-    @abstractmethod
+        logging.debug(f"pep249 arraysize {self.__class__.__name__}")
+        print(f"pep249 arraysize {self.__class__.__name__}")
+
     def fetchone(self: CursorType) -> Optional[ResultRow]:
         """
         Fetch the next row from the query result set as a sequence of Python
@@ -163,7 +177,9 @@ class CursorFetchMixin(metaclass=ABCMeta):
         error can be raised.
 
         """
-        print('fetchone')
+        logging.debug(f"pep249 fetchone {self.__class__.__name__}")
+        print(f"pep249 fetchone {self.__class__.__name__}")
+        return self.result[0]
 
     def fetchmany(self: CursorType, size: Optional[int] = None) -> ResultSet:
         """
@@ -178,7 +194,9 @@ class CursorFetchMixin(metaclass=ABCMeta):
         produce a result set, an error can be raised.
 
         """
-        print('fetchmany')
+        logging.debug(f"pep249 fetchmany {self.__class__.__name__}")
+        print(f"pep249 fetchmany {self.__class__.__name__}")
+        return self.result
 
 
     def fetchall(self: CursorType) -> ResultSet:
@@ -191,7 +209,9 @@ class CursorFetchMixin(metaclass=ABCMeta):
         produce a result set, an error can be raised.
 
         """
-        print('fetchall')
+        logging.debug(f"pep249 fetchall {self.__class__.__name__}")
+        print(f"pep249 fetchall {self.__class__.__name__}")
+        return self.result
 
     def nextset(self: CursorType) -> Optional[bool]:
         """
@@ -202,7 +222,8 @@ class CursorFetchMixin(metaclass=ABCMeta):
         This method is optional, as not all databases implement multiple
         result sets.
         """
-        print('nextset')
+        logging.debug(f"pep249 nextset {self.__class__.__name__}")
+        print(f"pep249 nextset {self.__class__.__name__}")
 
 
 class BaseCursor(
@@ -213,19 +234,21 @@ class BaseCursor(
 
 class Cursor(TransactionFreeContextMixin, BaseCursor, metaclass=ABCMeta):
     """A PEP 249 compliant Cursor protocol."""
+    def __init__(self, connection):
+        self.connection = connection
 
     def execute(self, query):
         result = self._query(query)
-        print('Querry execute')
+        logging.debug(f"pep249 execute {self.__class__.__name__}")
+        print(f"pep249 execute {self.__class__.__name__}")
         return result
 
     def _query(self, q):
         conn = self.connection
         conn.query(q)
-        print('Querry run')
+        logging.debug(f"pep249 _query {self.__class__.__name__}")
+        print(f"pep249 _query {self.__class__.__name__}")
         return
-
-
 
 class TransactionalCursor(
     TransactionContextMixin,
