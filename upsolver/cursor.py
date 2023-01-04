@@ -23,7 +23,7 @@ from .types import (
     ProcArgs,
 )
 
-from pep249.logging import logger
+from upsolver.logging import logger
 
 CursorType = TypeVar("CursorType", "Cursor", "TransactionalCursor")
 

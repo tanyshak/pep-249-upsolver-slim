@@ -5,7 +5,7 @@ database connection implementation, conformant with PEP 249.
 
 from typing import TypeVar
 
-from  pep249.logging import logger
+from  upsolver.logging import logger
 
 from .transactions import TransactionContextMixin, DummyTransactionContextMixin
 from .cursor import CursorType, Cursor

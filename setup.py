@@ -1,12 +1,12 @@
 """Setup script for PEP249."""
 import setuptools
-from pep249 import __version__
+from upsolver import __version__
 
 with open("README.md", "r") as readme_file:
     long_description = readme_file.read()
 
 setuptools.setup(
-    name="pep249upsolver",
+    name="upsolver-py",
     version=__version__,
     author="Tetiana Shemet",
     author_email="tanyshak@gmail.com",

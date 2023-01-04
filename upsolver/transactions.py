@@ -24,7 +24,7 @@ TransactionMixinType = TypeVar(
     "TransactionMixinType", bound="TransactionFreeContextMixin"
 )
 
-from  pep249.logging import logger
+from  upsolver.logging import logger
 
 # pylint: disable=too-few-public-methods
 class TransactionFreeContextMixin(metaclass=ABCMeta):
