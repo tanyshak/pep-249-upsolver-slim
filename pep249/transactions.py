@@ -24,6 +24,7 @@ TransactionMixinType = TypeVar(
     "TransactionMixinType", bound="TransactionFreeContextMixin"
 )
 
+from  pep249.logging import logger
 
 # pylint: disable=too-few-public-methods
 class TransactionFreeContextMixin(metaclass=ABCMeta):
@@ -47,7 +48,7 @@ class TransactionFreeContextMixin(metaclass=ABCMeta):
         If there are un-commited changes, this should perform a rollback.
 
         """
-        print('close')
+        logger.debug('Transaction close')
 
     def __enter__(self: TransactionMixinType) -> TransactionMixinType:
         """
@@ -90,7 +91,7 @@ class TransactionContextMixin(TransactionFreeContextMixin, metaclass=ABCMeta):
         Commit changes made since the start of the pending transaction.
 
         """
-        print('commit')
+        logger.debug('Transaction commit')
 
     def rollback(self) -> None:
         """
@@ -98,7 +99,7 @@ class TransactionContextMixin(TransactionFreeContextMixin, metaclass=ABCMeta):
         changes.
 
         """
-        print('rollback')
+        logger.debug('Transaction rollback')
 
     def __exit__(
         self,

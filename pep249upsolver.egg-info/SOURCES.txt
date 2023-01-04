@@ -6,6 +6,7 @@ pep249/connection.py
 pep249/cursor.py
 pep249/exceptions.py
 pep249/extensions.py
+pep249/logging.py
 pep249/transactions.py
 pep249/type_constructors.py
 pep249/types.py
@@ -16,7 +17,6 @@ pep249/aiopep249/exceptions.py
 pep249/aiopep249/extensions.py
 pep249/aiopep249/transactions.py
 pep249/aiopep249/type_constructors.py
-pep249/aiopep249/types.py
 pep249upsolver.egg-info/PKG-INFO
 pep249upsolver.egg-info/SOURCES.txt
 pep249upsolver.egg-info/dependency_links.txt

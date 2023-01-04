@@ -23,8 +23,7 @@ from .types import (
     ProcArgs,
 )
 
-import logging
-
+from pep249.logging import logger
 
 CursorType = TypeVar("CursorType", "Cursor", "TransactionalCursor")
 
@@ -48,8 +47,7 @@ class CursorExecuteMixin(metaclass=ABCMeta):
         as outlined in PEP 249.
 
         """
-        logging.debug(f"pep249 execute {self.__class__.__name__}")
-        print(f"pep249 execute {self.__class__.__name__}")
+        logger.debug(f"pep249 execute {self.__class__.__name__} query '{SQLQuery}'")
 
     def executemany(
         self: CursorType,
@@ -61,8 +59,7 @@ class CursorExecuteMixin(metaclass=ABCMeta):
         or mappings passed as parameters.
 
         """
-        logging.debug(f"pep249 executemany {self.__class__.__name__}")
-        print(f"pep249 executemany {self.__class__.__name__}")
+        logger.debug(f"pep249 executemany {self.__class__.__name__}")
 
     def callproc(
         self: CursorType, procname: ProcName, parameters: Optional[ProcArgs] = None
@@ -76,8 +73,8 @@ class CursorExecuteMixin(metaclass=ABCMeta):
         can be made available through the standard fetch methods.
 
         """
-        logging.debug(f"pep249 callproc {self.__class__.__name__}")
-        print(f"pep249 callproc {self.__class__.__name__}")
+        logger.debug(f"pep249 callproc {self.__class__.__name__}")
+        
 
 
 class CursorSetSizeMixin(metaclass=ABCMeta):
@@ -97,8 +94,8 @@ class CursorSetSizeMixin(metaclass=ABCMeta):
 
         Implementations are free to have this method do nothing.
         """
-        logging.debug(f"pep249 setinputsizes {self.__class__.__name__}")
-        print(f"pep249 setinputsizes {self.__class__.__name__}")
+        logger.debug(f"pep249 setinputsizes {self.__class__.__name__}")
+        
 
     def setoutputsize(self: CursorType, size: int, column: Optional[int]) -> None:
         """
@@ -113,8 +110,8 @@ class CursorSetSizeMixin(metaclass=ABCMeta):
 
         Implementations are free to have this method do nothing.
         """
-        logging.debug(f"pep249 setoutputsize {self.__class__.__name__}")
-        print(f"pep249 setoutputsize {self.__class__.__name__}")
+        logger.debug(f"pep249 setoutputsize {self.__class__.__name__}")
+        
 
 
 class CursorFetchMixin(metaclass=ABCMeta):
@@ -132,8 +129,8 @@ class CursorFetchMixin(metaclass=ABCMeta):
 
         If there is no result set, return None.
         """
-        logging.debug(f"pep249 description {self.__class__.__name__}")
-        print(f"pep249 description {self.__class__.__name__}")
+        logger.debug(f"pep249 description {self.__class__.__name__}")
+        
 
     @property
     def rowcount(self: CursorType) -> int:
@@ -145,8 +142,8 @@ class CursorFetchMixin(metaclass=ABCMeta):
         If no execute has been performed or the rowcount cannot be determined,
         this should return -1.
         """
-        logging.debug(f"pep249 rowcount {self.__class__.__name__}")
-        print(f"pep249 rowcount {self.__class__.__name__}")
+        logger.debug(f"pep249 rowcount {self.__class__.__name__}")
+        
 
     @property
     def arraysize(self: CursorType) -> int:
@@ -156,8 +153,8 @@ class CursorFetchMixin(metaclass=ABCMeta):
 
         Defaults to 1, meaning fetch a single row at a time.
         """
-        logging.debug(f"pep249 arraysize {self.__class__.__name__}")
-        print(f"pep249 arraysize {self.__class__.__name__}")
+        logger.debug(f"pep249 arraysize {self.__class__.__name__}")
+        
 
         return getattr(self, "_arraysize", 1)
 
@@ -165,8 +162,8 @@ class CursorFetchMixin(metaclass=ABCMeta):
     def arraysize(self: CursorType, value: int):
         setattr(self, "_arraysize", value)
 
-        logging.debug(f"pep249 arraysize {self.__class__.__name__}")
-        print(f"pep249 arraysize {self.__class__.__name__}")
+        logger.debug(f"pep249 arraysize {self.__class__.__name__}")
+        
 
     def fetchone(self: CursorType) -> Optional[ResultRow]:
         """
@@ -177,8 +174,8 @@ class CursorFetchMixin(metaclass=ABCMeta):
         error can be raised.
 
         """
-        logging.debug(f"pep249 fetchone {self.__class__.__name__}")
-        print(f"pep249 fetchone {self.__class__.__name__}")
+        logger.debug(f"pep249 fetchone {self.__class__.__name__}")
+        
         return self.result[0]
 
     def fetchmany(self: CursorType, size: Optional[int] = None) -> ResultSet:
@@ -194,8 +191,8 @@ class CursorFetchMixin(metaclass=ABCMeta):
         produce a result set, an error can be raised.
 
         """
-        logging.debug(f"pep249 fetchmany {self.__class__.__name__}")
-        print(f"pep249 fetchmany {self.__class__.__name__}")
+        logger.debug(f"pep249 fetchmany {self.__class__.__name__}")
+        
         return self.result
 
 
@@ -209,8 +206,8 @@ class CursorFetchMixin(metaclass=ABCMeta):
         produce a result set, an error can be raised.
 
         """
-        logging.debug(f"pep249 fetchall {self.__class__.__name__}")
-        print(f"pep249 fetchall {self.__class__.__name__}")
+        logger.debug(f"pep249 fetchall {self.__class__.__name__}")
+        
         return self.result
 
     def nextset(self: CursorType) -> Optional[bool]:
@@ -222,10 +219,8 @@ class CursorFetchMixin(metaclass=ABCMeta):
         This method is optional, as not all databases implement multiple
         result sets.
         """
-        logging.debug(f"pep249 nextset {self.__class__.__name__}")
-        print(f"pep249 nextset {self.__class__.__name__}")
-
-
+        logger.debug(f"pep249 nextset {self.__class__.__name__}")
+        
 class BaseCursor(
     CursorFetchMixin, CursorExecuteMixin, CursorSetSizeMixin, metaclass=ABCMeta
 ):
@@ -237,17 +232,16 @@ class Cursor(TransactionFreeContextMixin, BaseCursor, metaclass=ABCMeta):
     def __init__(self, connection):
         self.connection = connection
 
-    def execute(self, query):
+    def execute(self, query, parameters: Optional[QueryParameters] = None):
+        #TODO: handle parameters
         result = self._query(query)
-        logging.debug(f"pep249 execute {self.__class__.__name__}")
-        print(f"pep249 execute {self.__class__.__name__}")
+        logger.debug(f"pep249 _query {self.__class__.__name__} query '{query}'")
         return result
 
     def _query(self, q):
         conn = self.connection
         conn.query(q)
-        logging.debug(f"pep249 _query {self.__class__.__name__}")
-        print(f"pep249 _query {self.__class__.__name__}")
+        logger.debug(f"pep249 _query {self.__class__.__name__} query '{q}'")
         return
 
 class TransactionalCursor(
