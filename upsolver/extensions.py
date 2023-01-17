@@ -6,7 +6,7 @@ https://www.python.org/dev/peps/pep-0249/#optional-db-api-extensions
 """
 from abc import abstractmethod, ABCMeta
 from typing import Iterator, Optional, Type, TYPE_CHECKING
-from .types import ResultRow
+from .types_definitions import ResultRow
 
 if TYPE_CHECKING:
     from .connection import BaseConnection

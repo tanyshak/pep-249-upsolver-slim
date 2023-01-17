@@ -16,7 +16,7 @@ from .transactions import (
 )
 from .exceptions import *
 from .extensions import *
-from .types import *
+from .types_definitions import *
 
 __version__ = "0.0.1b3"
 
