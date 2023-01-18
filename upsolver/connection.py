@@ -1,13 +1,12 @@
 """
-database connection implementation, conformant with PEP 249.
+Implementation of connection by the Python DBAPI 2.0 as described in
+https://www.python.org/dev/peps/pep-0249/ .
 
 """
 
 from upsolver.logging_utils import logger
-
 from upsolver.exceptions import NotSupportedError, InterfaceError
-from upsolver.transactions import TransactionContextMixin, DummyTransactionContextMixin
-from upsolver.cursor import CursorType, Cursor
+from upsolver.cursor import Cursor
 
 from cli.upsolver.query import RestQueryApi
 from cli.upsolver.requester import Requester
@@ -21,15 +20,7 @@ def connect(token, api_url):
     return Connection(token, api_url)
 
 
-class BaseConnection:  # pylint: disable=too-few-public-methods
-    """A Connection without an associated context."""
-
-    def cursor(self):
-        logger.debug(f"pep249 Cursor creating for object {self.__class__.__name__}")
-        return Cursor(self)
-
-
-class Connection(TransactionContextMixin, BaseConnection):
+class Connection:
     """A PEP 249 compliant Connection protocol."""
 
     def __init__(self, token, api_url, timeout_sec='30s'):
@@ -44,21 +35,21 @@ class Connection(TransactionContextMixin, BaseConnection):
         self._timeout_sec = convert_time_str(None, None, timeout_sec)
 
     def cursor(self):
+        logger.debug(f"pep249 Cursor creating for object {self.__class__.__name__}")
+
         if self._api is None:
             raise InterfaceError
 
-        return BaseConnection.cursor(self)
+        return Cursor(self)
 
     def close(self):
         logger.debug(f"pep249 close {self.__class__.__name__}")
         self._api = None
 
     def commit(self):
-        logger.debug(f"pep249 commit {self.__class__.__name__}")
-        pass
+        raise NotSupportedError
 
     def rollback(self):
-        logger.debug(f"pep249 rollback {self.__class__.__name__}")
         raise NotSupportedError
 
     def query(self, command):
@@ -76,10 +67,3 @@ class Connection(TransactionContextMixin, BaseConnection):
                     responses.append(res_part)
         return responses
 
-
-class TransactionlessConnection(DummyTransactionContextMixin, BaseConnection):
-    """
-    A PEP 249 compliant Connection protocol for databases without
-    transaction support.
-
-    """
