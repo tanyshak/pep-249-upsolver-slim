@@ -32,7 +32,7 @@ class BaseConnection:  # pylint: disable=too-few-public-methods
 class Connection(TransactionContextMixin, BaseConnection):
     """A PEP 249 compliant Connection protocol."""
 
-    def __init__(self, token, api_url, timeout_sec='30s'):
+    def __init__(self, token, api_url, timeout_sec='60s'):
         self._api = RestQueryApi(
             requester=Requester(
                 base_url=api_url,
