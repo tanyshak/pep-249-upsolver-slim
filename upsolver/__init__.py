@@ -7,8 +7,8 @@ will enforce implementation of the relevant functions, and will implement
 some functionality (e.g. context managers) for free.
 
 """
-from .connection import Connection, TransactionlessConnection
-from .cursor import Cursor, TransactionalCursor, CursorExecuteMixin, CursorFetchMixin
+from .connection import Connection
+from .cursor import Cursor
 from .transactions import (
     TransactionFreeContextMixin,
     TransactionContextMixin,
@@ -22,11 +22,7 @@ __version__ = "0.0.1b3"
 
 __all__ = [
     "Connection",
-    "TransactionlessConnection",
     "Cursor",
-    "TransactionalCursor",
-    "CursorExecuteMixin",
-    "CursorFetchMixin",
     "ConnectionErrorsMixin",
     "CursorConnectionMixin",
     "IterableCursorMixin",
