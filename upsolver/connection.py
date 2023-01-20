@@ -51,7 +51,6 @@ class Connection:
         self._closed = True
 
     @property
-    @check_closed
     def closed(self) -> bool:
         return self._closed
 
