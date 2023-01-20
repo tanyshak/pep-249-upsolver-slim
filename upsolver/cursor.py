@@ -3,10 +3,12 @@ Implementation of cursor by the Python DBAPI 2.0 as described in
 https://www.python.org/dev/peps/pep-0249/ .
 
 """
+from functools import wraps
 from typing import Optional, Sequence, Type, Union
 
 from upsolver.logging_utils import logger
 from upsolver.exceptions import NotSupportedError, InterfaceError
+from upsolver.type_constructors import STRING
 from upsolver.types_definitions import (
     QueryParameters,
     ResultRow,
@@ -18,6 +20,15 @@ from upsolver.types_definitions import (
 )
 
 
+def check_closed(func):
+    @wraps(func)
+    def wrapped(self, *args, **kwargs):
+        if self.closed:
+            raise InterfaceError
+        return func(self, *args, **kwargs)
+    return wrapped
+
+
 class Cursor:
     """A PEP 249 compliant Cursor protocol."""
     def __init__(self, connection):
@@ -25,7 +36,9 @@ class Cursor:
         self._arraysize = 1
         self._result = None
         self._iterator = None
+        self._closed = False
 
+    @check_closed
     def execute(self, operation: SQLQuery, parameters: Optional[QueryParameters] = None):
         """
         Execute an SQL query. Values may be bound by passing parameters
@@ -33,9 +46,10 @@ class Cursor:
 
         """
         logger.debug(f"pep249 execute {self.__class__.__name__} query '{operation}'")
+        if parameters is not None:
+            raise NotSupportedError
 
-        # TODO: handle parameters
-        result = self._query(operation)
+        result = self._connection.query(operation)
         self._result = result
         self._iterator = iter(result)
         return result
@@ -44,32 +58,32 @@ class Cursor:
         raise NotSupportedError
 
     def callproc(self, procname: ProcName, parameters: Optional[ProcArgs] = None) -> Optional[ProcArgs]:
-        """
-        Execute an SQL stored procedure, passing the sequence of parameters.
-        The parameters should contain one entry for each procedure argument.
+        raise NotSupportedError
 
-        The result of the call is returned as a modified copy of the input
-        parameters. The procedure may also provide a result set, which
-        can be made available through the standard fetch methods.
-
-        """
-        logger.debug(f"pep249 callproc {self.__class__.__name__}")
-        # TODO: implement
-
+    @check_closed
     @property
     def description(self) -> Optional[Sequence[ColumnDescription]]:
         """
         A read-only attribute returning a sequence containing a description
-        (a seven-item sequence) for each column in the result set.
+        (a seven-item sequence) for each column in the result set. The first
+        item of the sequence is a column name, the second is a column type,
+        which is always STRING in current implementation, other items are not
+        meaningful.
 
-        The values returned for each column are outlined in the PEP:
-        https://www.python.org/dev/peps/pep-0249/#description
-
-        If there is no result set, return None.
+        If no execute has been performed or there is no result set, return None.
         """
         logger.debug(f"pep249 description {self.__class__.__name__}")
-        # TODO: implement
 
+        if self._result is None:
+            return None
+
+        example_result = self._result[0]
+        return [
+            (name, STRING, None, None, None, None, None)
+            for name in example_result.keys()
+        ]
+
+    @check_closed
     @property
     def rowcount(self) -> int:
         """
@@ -88,6 +102,7 @@ class Cursor:
         return len(self._result)
 
     @property
+    @check_closed
     def arraysize(self) -> int:
         """
         An attribute specifying the number of rows to fetch at a time with
@@ -100,6 +115,7 @@ class Cursor:
         return self._arraysize
 
     @arraysize.setter
+    @check_closed
     def arraysize(self, value: int):
         logger.debug(f"pep249 arraysize {self.__class__.__name__}")
 
@@ -108,6 +124,7 @@ class Cursor:
         else:
             raise InterfaceError
 
+    @check_closed
     def fetchone(self) -> Optional[ResultRow]:
         """
         Fetch the next row from the query result set as a sequence of Python
@@ -127,6 +144,7 @@ class Cursor:
         except StopIteration:
             return None
 
+    @check_closed
     def fetchmany(self, size: Optional[int] = None) -> Optional[ResultSet]:
         """
         Fetch the next `size` rows from the query result set as a list
@@ -154,6 +172,7 @@ class Cursor:
 
         return result
 
+    @check_closed
     def fetchall(self) -> ResultSet:
         """
         Fetch the remaining rows from the query result set as a list of
@@ -178,13 +197,8 @@ class Cursor:
 
         return result
 
+    @check_closed
     def nextset(self) -> Optional[bool]:
-        """
-        Skip the cursor to the next available result set, discarding
-        rows from the current set. If there are no more sets, return
-        None, otherwise return True.
-        """
-        # TODO: check if it is possible to support
         raise NotSupportedError
 
     def setinputsizes(self, sizes: Sequence[Optional[Union[int, Type]]]) -> None:
@@ -193,13 +207,11 @@ class Cursor:
     def setoutputsize(self, size: int, column: Optional[int]) -> None:
         raise NotSupportedError
 
+    @check_closed
     def close(self) -> None:
         logger.debug(f"pep249 close {self.__class__.__name__}")
-        self._connection = None
+        self._closed = True
 
-    def _query(self, sql_query):
-        if not self._connection:
-            raise InterfaceError
-
-        result = self._connection.query(sql_query)
-        return result
+    @property
+    def closed(self) -> bool:
+        return self._closed
