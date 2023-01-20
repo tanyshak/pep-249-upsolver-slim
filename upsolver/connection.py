@@ -23,7 +23,7 @@ def connect(token, api_url):
 class Connection:
     """A PEP 249 compliant Connection protocol."""
 
-    def __init__(self, token, api_url, timeout_sec='30s'):
+    def __init__(self, token, api_url, timeout_sec='60s'):
         # TODO: timeout generic
         self._api = RestQueryApi(
             requester=Requester(
