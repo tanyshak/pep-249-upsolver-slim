@@ -13,6 +13,7 @@ from cli.upsolver.requester import Requester
 from cli.upsolver.poller import SimpleResponsePoller
 from cli.upsolver.auth_filler import TokenAuthFiller
 from cli.utils import convert_time_str
+from cli.errors import InvalidOptionErr
 
 
 def connect(token, api_url):
@@ -20,11 +21,23 @@ def connect(token, api_url):
     return Connection(token, api_url)
 
 
+def get_duration_in_seconds(time):
+    if type(time) == float:
+        return time
+    if type(time) == int:
+        return float(time)
+    if type(time) == str:
+        try:
+            return convert_time_str(None, None, time)
+        except InvalidOptionErr:
+            raise InterfaceError
+    raise InterfaceError
+
+
 class Connection:
     """A PEP 249 compliant Connection protocol."""
 
     def __init__(self, token, api_url, timeout_sec='60s'):
-        # TODO: timeout generic
         self._api = RestQueryApi(
             requester=Requester(
                 base_url=api_url,
@@ -33,7 +46,7 @@ class Connection:
             poller_builder=lambda to_sec: SimpleResponsePoller(max_time_sec=to_sec)
         )
 
-        self._timeout_sec = convert_time_str(None, None, timeout_sec)
+        self._timeout = get_duration_in_seconds(timeout_sec)
         self._closed = False
 
     @check_closed
@@ -66,14 +79,4 @@ class Connection:
         if self._api is None:
             raise InterfaceError
 
-        # TODO: response as generator
-        # TODO: handle command from file
-        responses = []
-        for res in self._api.execute(command, self._timeout_sec):
-            for res_part in res:
-                response_kind = res_part.get("kind")
-                if response_kind == "upsolver_query_response":
-                    responses.append(res_part.get("message"))
-                else:
-                    responses.append(res_part)
-        return responses
+        return self._api.execute(command, self._timeout)

@@ -4,6 +4,7 @@ https://www.python.org/dev/peps/pep-0249/ .
 
 """
 from functools import wraps
+from pathlib import Path
 from typing import Optional, Sequence, Type, Union
 
 from upsolver.logging_utils import logger
@@ -34,7 +35,7 @@ class Cursor:
     def __init__(self, connection):
         self._connection = connection
         self._arraysize = 1
-        self._result = None
+        self._description = None
         self._iterator = None
         self._closed = False
 
@@ -49,10 +50,44 @@ class Cursor:
         if parameters is not None:
             raise NotSupportedError
 
-        result = self._connection.query(operation)
-        self._result = result
-        self._iterator = iter(result)
-        return result
+        query_response = self._connection.query(operation)
+        self._iterator = self._prepare_query_results(query_response)
+        return self._iterator
+
+    @check_closed
+    def executefile(self, file_path: str):
+        """
+        Execute an SQL query from file.
+        """
+        logger.debug(f"pep249 executefile {self.__class__.__name__} file '{file_path}'")
+
+        p = Path(file_path)
+        if not p.exists():
+            raise InterfaceError
+        operation = p.read_text()
+        return self.execute(operation)
+
+    def _prepare_query_results(self, query_response):
+        first_response = next(query_response)
+        example_result = first_response[0]
+        if example_result.get("kind") != "upsolver_query_response":
+            self._description = [(name, STRING, None, None, None, None, None)
+                                 for name in example_result.keys()]
+
+        for result in first_response:
+            response_kind = result.get("kind")
+            if response_kind == "upsolver_query_response":
+                yield result.get("message")
+            else:
+                yield result
+
+        for next_response in query_response:
+            for result in next_response:
+                response_kind = result.get("kind")
+                if response_kind == "upsolver_query_response":
+                    yield result.get("message")
+                else:
+                    yield result
 
     def executemany(self, operation: SQLQuery, seq_of_parameters: Sequence[QueryParameters]):
         raise NotSupportedError
@@ -60,8 +95,8 @@ class Cursor:
     def callproc(self, procname: ProcName, parameters: Optional[ProcArgs] = None) -> Optional[ProcArgs]:
         raise NotSupportedError
 
-    @check_closed
     @property
+    @check_closed
     def description(self) -> Optional[Sequence[ColumnDescription]]:
         """
         A read-only attribute returning a sequence containing a description
@@ -73,33 +108,17 @@ class Cursor:
         If no execute has been performed or there is no result set, return None.
         """
         logger.debug(f"pep249 description {self.__class__.__name__}")
-
-        if self._result is None:
-            return None
-
-        example_result = self._result[0]
-        return [
-            (name, STRING, None, None, None, None, None)
-            for name in example_result.keys()
-        ]
+        return self._description
 
     @check_closed
     @property
     def rowcount(self) -> int:
         """
-        A read-only attribute returning the number of rows that the last
-        execute call returned (for e.g. SELECT calls) or affected (for e.g.
-        UPDATE/INSERT calls).
-
         If no execute has been performed or the rowcount cannot be determined,
         this should return -1.
         """
         logger.debug(f"pep249 rowcount {self.__class__.__name__}")
-
-        if self._result is None:
-            return -1
-
-        return len(self._result)
+        return -1
 
     @property
     @check_closed
